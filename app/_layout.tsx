@@ -1,59 +1,61 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import "react-native-get-random-values";
+import React, { useEffect, useState } from "react";
+import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthProvider } from "../context/AuthContext";
+import { OrdersProvider, useOrders } from "../context/OrdersContext";
+import {
+  registerBackgroundTask,
+  requestNotificationPermissions,
+} from "../services/NotificationService";
 
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+const Layout = () => {
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    const initNotifications = async () => {
+      try {
+        const hasPermission = await requestNotificationPermissions();
+        if (hasPermission) {
+          await registerBackgroundTask();
+          console.log("Notifications initialized successfully");
+        } else {
+          console.warn("Notification permissions not granted");
+        }
+      } catch (error) {
+        console.error("Failed to initialize notifications:", error);
+      }
+    };
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+    initNotifications();
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <OrdersProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen
+              name="auth/login"
+              options={{
+                headerTitle: "Login in",
+              }}
+            />
+            <Stack.Screen
+              name="auth/update_user"
+              options={{
+                headerTitle: "Personal Info",
+              }}
+            />
+            <Stack.Screen
+              name="reminder/reminder"
+              options={{
+                headerTitle: "Reminder",
+              }}
+            />
+          </Stack>
+        </OrdersProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
-}
+};
+
+export default Layout;

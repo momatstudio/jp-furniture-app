@@ -1,0 +1,116 @@
+// import FontAwesome from "@expo/vector-icons/FontAwesome";
+// import {
+//   DarkTheme,
+//   DefaultTheme,
+//   ThemeProvider,
+// } from "@react-navigation/native";
+// import { useFonts } from "expo-font";
+// import { Stack } from "expo-router";
+// import * as SplashScreen from "expo-splash-screen";
+// import { useEffect } from "react";
+// import "react-native-reanimated";
+
+// import { useColorScheme } from "@/components/useColorScheme";
+
+// export {
+//   // Catch any errors thrown by the Layout component.
+//   ErrorBoundary,
+// } from "expo-router";
+
+// export const unstable_settings = {
+//   // Ensure that reloading on `/modal` keeps a back button present.
+//   initialRouteName: "(tabs)",
+// };
+
+// // Prevent the splash screen from auto-hiding before asset loading is complete.
+// SplashScreen.preventAutoHideAsync();
+
+// export default function RootLayout() {
+//   const [loaded, error] = useFonts({
+//     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+//     ...FontAwesome.font,
+//   });
+
+//   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+//   useEffect(() => {
+//     if (error) throw error;
+//   }, [error]);
+
+//   useEffect(() => {
+//     if (loaded) {
+//       SplashScreen.hideAsync();
+//     }
+//   }, [loaded]);
+
+//   if (!loaded) {
+//     return null;
+//   }
+
+//   return <RootLayoutNav />;
+// }
+
+// function RootLayoutNav() {
+//   const colorScheme = useColorScheme();
+
+//   return (
+//     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+//       <Stack>
+//         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+//         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+//       </Stack>
+//     </ThemeProvider>
+//   );
+// }
+
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthProvider } from "@/context/AuthContext";
+import { Redirect, Stack } from "expo-router";
+import { useContext } from "react";
+import AuthContext from "@/context/AuthContext";
+import Loading from "@/components/Loading";
+import { OrdersProvider } from "@/context/OrdersContext";
+
+function AuthCheck() {
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) return <Loading />;
+
+  return (
+    <GestureHandlerRootView>
+      <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            headerTitle: "Redirect",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="auth/login"
+          options={{
+            headerTitle: "Login in",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="order/[id]"
+          options={{
+            headerTitle: "Order",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <OrdersProvider>
+        <AuthCheck />
+      </OrdersProvider>
+    </AuthProvider>
+  );
+}

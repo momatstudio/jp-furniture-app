@@ -2,16 +2,23 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "esModuleInterop": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "expo-env.d.ts",
+    "hooks/useAsyncStorage.js",
+    "services/NotificationService.js",
+    "actions/index.js",
+    "app/(tabs)/items.jsx",
+    "app/order/[id].jsx",
+    "components/modals/MapModal.jsx",
+    "app/(tabs)/orders.jsx",
+    "components/Picker.jsx"
   ]
 }
